@@ -37,9 +37,9 @@ class GameKeyboard extends StatelessWidget {
         Color bgColor = Colors.grey.shade300; // Default
         LetterStatus? status = game.keyStatus[key];
 
-        if (status == LetterStatus.correct)
+        if (status == LetterStatus.correct) {
           bgColor = Colors.green;
-        else if (status == LetterStatus.inWord)
+        } else if (status == LetterStatus.inWord)
           bgColor = Colors.orangeAccent;
         else if (status == LetterStatus.notInWord)
           bgColor = Colors.grey.shade600;

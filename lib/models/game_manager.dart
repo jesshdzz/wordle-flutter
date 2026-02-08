@@ -2,22 +2,32 @@ import 'dart:math';
 import '../utils/game_status.dart';
 
 class GameManager {
+  late String palabraClave;
   final int wordLength = 5;
   final int maxAttempts = 6;
 
-  // Palabras posibles (5 letras)
-  static const List<String> _palabrasPosibles = [
+  final List<String> palabrasPosibles = [
     "PERRO",
     "GATOS",
-    "LAPIZ",
-    "LIBRO",
-    "ARBOL",
     "CASAS",
+    "ARBOL",
+    "LIBRO",
     "MESAS",
     "SILLA",
+    "FUEGO",
+    "AGUAS",
     "RELOJ",
-    "CARRO",
+    "LAPIZ",
+    "PAPEL",
+    "FLOR",
+    "NUBES",
+    "COCHE",
+    "AVION",
+    "BARCO",
+    "TREN",
     "PLAYA",
+    "MONTE",
+    "CARRO",
     "NOCHE",
     "TARDE",
     "LUNES",
@@ -29,9 +39,12 @@ class GameManager {
     "AUTOR",
   ];
 
-  late String palabraClave;
   GameStatus status = GameStatus.playing;
   Map<String, LetterStatus> keyStatus = {};
+
+  int intentoActual = 0; // En qué fila vamos (0 a 5)
+  List<String> palabrasIntentadas = []; // Lista de palabras que el usuario ha intentado
+  String palabraActual = ""; // Palabra que el usuario está escribiendo AHORA mismo
 
   GameManager() {
     reset();
@@ -39,16 +52,12 @@ class GameManager {
 
   void reset() {
     status = GameStatus.playing;
-    palabraClave = _palabrasPosibles[Random().nextInt(_palabrasPosibles.length)];
+    palabraClave = palabrasPosibles[Random().nextInt(palabrasPosibles.length)];
     palabrasIntentadas.clear();
     palabraActual = "";
     keyStatus.clear();
     intentoActual = 0; // Aunque usamos length de la lista, es bueno resetear si se usara
   }
-
-  int intentoActual = 0; // En qué fila vamos (0 a 5)
-  List<String> palabrasIntentadas = []; // Lista de palabras que el usuario ha intentado
-  String palabraActual = ""; // Palabra que el usuario está escribiendo AHORA mismo
 
   void onType(String letra) {
     if (status != GameStatus.playing) return; // No permitir escribir si terminó
