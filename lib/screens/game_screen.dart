@@ -18,7 +18,20 @@ class GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Wordle")),
+      appBar: AppBar(
+        title: const Text("Wordle"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              setState(() {
+                game.reset();
+              });
+            },
+            tooltip: "Reiniciar",
+          ),
+        ],
+      ),
       body: Column(
         children: [
           // ZONA DEL TABLERO
@@ -97,18 +110,44 @@ class GameScreenState extends State<GameScreen> {
   }
 
   void showGameOverDialog() {
+    String title = game.status == GameStatus.won ? "¡Ganaste!" : "¡Perdiste!";
+    String message = game.status == GameStatus.won
+        ? "¡Felicidades! Adivinaste la palabra."
+        : "La palabra era: ${game.palabraClave}";
+
+    IconData icon = game.status == GameStatus.won ? Icons.emoji_events : Icons.sentiment_very_dissatisfied;
+    Color color = game.status == GameStatus.won ? Colors.green : Colors.red;
+
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (_) => AlertDialog(
-        title: const Text("Fin del Juego"),
-        content: Text("La palabra era ${game.palabraClave}"),
+        title: Row(
+          children: [
+            Icon(icon, color: color),
+            const SizedBox(width: 10),
+            Text(title),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(message, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 20),
+            const Text("¿Quieres jugar de nuevo?"),
+          ],
+        ),
         actions: [
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              // Aquí podrías reiniciar el juego
+              setState(() {
+                game.reset();
+              });
             },
-            child: const Text("OK"),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, foregroundColor: Colors.white),
+            child: const Text("Jugar de nuevo"),
           ),
         ],
       ),

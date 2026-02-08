@@ -8,7 +8,7 @@ class GameManager {
   // Palabras posibles (5 letras)
   static const List<String> _palabrasPosibles = [
     "PERRO",
-    "GATO",
+    "GATOS",
     "LAPIZ",
     "LIBRO",
     "ARBOL",
@@ -29,47 +29,56 @@ class GameManager {
     "AUTOR",
   ];
 
-  late final String palabraClave;
+  late String palabraClave;
+  GameStatus status = GameStatus.playing;
+  Map<String, LetterStatus> keyStatus = {};
 
   GameManager() {
-    palabraClave = _palabrasPosibles[Random().nextInt(_palabrasPosibles.length)];
+    reset();
   }
 
-  Map<String, LetterStatus> keyStatus = {};
+  void reset() {
+    status = GameStatus.playing;
+    palabraClave = _palabrasPosibles[Random().nextInt(_palabrasPosibles.length)];
+    palabrasIntentadas.clear();
+    palabraActual = "";
+    keyStatus.clear();
+    intentoActual = 0; // Aunque usamos length de la lista, es bueno resetear si se usara
+  }
+
+  int intentoActual = 0; // En qué fila vamos (0 a 5)
   List<String> palabrasIntentadas = []; // Lista de palabras que el usuario ha intentado
   String palabraActual = ""; // Palabra que el usuario está escribiendo AHORA mismo
 
   void onType(String letra) {
+    if (status != GameStatus.playing) return; // No permitir escribir si terminó
     if (palabraActual.length < wordLength) {
       palabraActual += letra.toUpperCase();
     }
   }
 
   void onDelete() {
+    if (status != GameStatus.playing) return;
     if (palabraActual.isNotEmpty) {
       palabraActual = palabraActual.substring(0, palabraActual.length - 1);
     }
   }
 
   bool onEnter() {
+    if (status != GameStatus.playing) return false;
     if (palabraActual.length != wordLength) return false; // No enviar si faltan letras
 
+    // 1. Actualizar teclado (lógica visual)
     for (int i = 0; i < wordLength; i++) {
       String letter = palabraActual[i];
+      LetterStatus currentStatus = LetterStatus.notInWord;
 
-      // Obtenemos el estatus de esta letra en este intento específico
-      // Nota: Usamos una versión simplificada de tu lógica aquí o reutilizamos el resultado visual
-      // Para efectos del teclado, la prioridad es: GREEN > YELLOW > GRAY
-
-      LetterStatus currentStatus = LetterStatus.notInWord; // Por defecto
       if (palabraClave[i] == letter) {
         currentStatus = LetterStatus.correct;
       } else if (palabraClave.contains(letter)) {
         currentStatus = LetterStatus.inWord;
       }
 
-      // 2. Actualizamos el mapa del teclado SOLO si mejoramos el estado
-      // (Si ya era Verde, no puede bajar a Amarillo o Gris)
       if (!keyStatus.containsKey(letter)) {
         keyStatus[letter] = currentStatus;
       } else {
@@ -83,9 +92,15 @@ class GameManager {
     }
 
     palabrasIntentadas.add(palabraActual);
-    palabraActual = "";
 
-    // TODO: Implementar lógica de victoria/derrota
+    // 2. Verificar Victoria / Derrota
+    if (palabraActual == palabraClave) {
+      status = GameStatus.won;
+    } else if (palabrasIntentadas.length >= maxAttempts) {
+      status = GameStatus.lost;
+    }
+
+    palabraActual = "";
     return true;
   }
 

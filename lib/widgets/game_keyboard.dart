@@ -46,10 +46,15 @@ class GameKeyboard extends StatelessWidget {
 
         return Container(
           margin: const EdgeInsets.all(3),
-          child: Material(
+          decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BorderRadius.circular(4),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), offset: const Offset(0, 2), blurRadius: 2)],
+          ),
+          child: Material(
+            color: Colors.transparent,
             child: InkWell(
+              borderRadius: BorderRadius.circular(4),
               onTap: () {
                 if (key == "ENTER") {
                   onEnter();
@@ -61,10 +66,10 @@ class GameKeyboard extends StatelessWidget {
               },
               child: Container(
                 width: width,
-                height: 50,
+                height: 56, // Slightly taller keys
                 alignment: Alignment.center,
                 child: key == "⌫"
-                    ? const Icon(Icons.backspace_outlined, size: 18)
+                    ? const Icon(Icons.backspace_outlined, size: 20)
                     : Text(
                         key,
                         style: TextStyle(fontSize: key.length > 1 ? 12 : 18, fontWeight: FontWeight.bold),
