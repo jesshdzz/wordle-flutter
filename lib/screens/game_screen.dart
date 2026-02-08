@@ -1,8 +1,11 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:wordle/utils/game_status.dart';
 import '../models/game_manager.dart'; // Importamos la lógica
 import '../widgets/letter_box.dart';
 import '../widgets/game_keyboard.dart';
+
+import '../widgets/instructions_dialog.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -11,9 +14,34 @@ class GameScreen extends StatefulWidget {
   State<GameScreen> createState() => GameScreenState();
 }
 
-class GameScreenState extends State<GameScreen> {
+class GameScreenState extends State<GameScreen> with SingleTickerProviderStateMixin {
   // Instanciamos la lógica aquí
   final GameManager game = GameManager();
+  late AnimationController _shakeController;
+
+  @override
+  void initState() {
+    super.initState();
+    _shakeController = AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showInstructions();
+    });
+  }
+
+  @override
+  void dispose() {
+    _shakeController.dispose();
+    super.dispose();
+  }
+
+  void _showInstructions() {
+    showDialog(context: context, builder: (_) => const InstructionsDialog());
+  }
+
+  void _triggerShake() {
+    _shakeController.forward(from: 0).then((_) => _shakeController.reset());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +49,7 @@ class GameScreenState extends State<GameScreen> {
       appBar: AppBar(
         title: const Text("Wordle"),
         actions: [
+          IconButton(icon: const Icon(Icons.help_outline), onPressed: _showInstructions, tooltip: "Instrucciones"),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
@@ -68,6 +97,7 @@ class GameScreenState extends State<GameScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("¡Faltan letras!"), duration: Duration(milliseconds: 500)),
                     );
+                    _triggerShake();
                     return;
                   }
 
@@ -94,18 +124,30 @@ class GameScreenState extends State<GameScreen> {
       wordToDisplay = game.palabraActual;
     }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(game.wordLength, (letterIndex) {
-        String letter = "";
-        if (letterIndex < wordToDisplay.length) {
-          letter = wordToDisplay[letterIndex];
+    return AnimatedBuilder(
+      animation: _shakeController,
+      builder: (context, child) {
+        double offset = 0;
+        // Only shake the current row
+        if (rowIndex == game.palabrasIntentadas.length) {
+          // Simple sine wave shake: sin(value * PI * count)
+          offset = 10 * sin(_shakeController.value * 3 * 3.14159);
         }
+        return Transform.translate(offset: Offset(offset, 0), child: child);
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(game.wordLength, (letterIndex) {
+          String letter = "";
+          if (letterIndex < wordToDisplay.length) {
+            letter = wordToDisplay[letterIndex];
+          }
 
-        LetterStatus status = game.getStatus(rowIndex, letterIndex);
+          LetterStatus status = game.getStatus(rowIndex, letterIndex);
 
-        return LetterBox(letter: letter, status: status);
-      }),
+          return LetterBox(letter: letter, status: status);
+        }),
+      ),
     );
   }
 
