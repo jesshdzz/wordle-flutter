@@ -20,6 +20,7 @@ class GameKeyboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         buildRow(["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"]),
         buildRow(["A", "S", "D", "F", "G", "H", "J", "K", "L", "⌫"]),
@@ -32,54 +33,68 @@ class GameKeyboard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: keys.map((key) {
-        double width = (key.length > 1) ? 54 : 30;
+        // Use flex factor to give Enter/Backspace more space if needed
+        int flex = (key.length > 1) ? 2 : 1;
 
-        Color bgColor = Colors.grey.shade300; // Default
-        LetterStatus? status = game.keyStatus[key];
-
-        if (status == LetterStatus.correct) {
-          bgColor = Colors.green;
-        } else if (status == LetterStatus.inWord) {
-          bgColor = Colors.orangeAccent;
-        } else if (status == LetterStatus.notInWord) {
-          bgColor = Colors.grey.shade600;
-        }
-
-        return Container(
-          margin: const EdgeInsets.all(3),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(4),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), offset: const Offset(0, 2), blurRadius: 2)],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
+        return Expanded(
+          flex: flex,
+          child: Container(
+            margin: const EdgeInsets.all(2), // Reduce margin slightly
+            height: 50, // Keep height somewhat fixed or use aspect ratio
+            decoration: BoxDecoration(
+              color: _getKeyColor(key),
               borderRadius: BorderRadius.circular(4),
-              onTap: () {
-                if (key == "ENTER") {
-                  onEnter();
-                } else if (key == "⌫") {
-                  onDelete();
-                } else {
-                  onKeyPressed(key);
-                }
-              },
-              child: Container(
-                width: width,
-                height: 56, // Slightly taller keys
-                alignment: Alignment.center,
-                child: key == "⌫"
-                    ? const Icon(Icons.backspace_outlined, size: 20)
-                    : Text(
-                        key,
-                        style: TextStyle(fontSize: key.length > 1 ? 12 : 18, fontWeight: FontWeight.bold),
-                      ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  offset: const Offset(0, 2),
+                  blurRadius: 2,
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(4),
+                onTap: () {
+                  if (key == "ENTER") {
+                    onEnter();
+                  } else if (key == "⌫") {
+                    onDelete();
+                  } else {
+                    onKeyPressed(key);
+                  }
+                },
+                child: Center(
+                  child: key == "⌫"
+                      ? const Icon(Icons.backspace_outlined, size: 20)
+                      : Text(
+                          key,
+                          style: TextStyle(
+                            fontSize: key.length > 1 ? 12 : 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
               ),
             ),
           ),
         );
       }).toList(),
     );
+  }
+
+  Color _getKeyColor(String key) {
+    Color bgColor = Colors.grey.shade300; // Default
+    LetterStatus? status = game.keyStatus[key];
+
+    if (status == LetterStatus.correct) {
+      bgColor = Colors.green;
+    } else if (status == LetterStatus.inWord) {
+      bgColor = Colors.orangeAccent;
+    } else if (status == LetterStatus.notInWord) {
+      bgColor = Colors.grey.shade600;
+    }
+    return bgColor;
   }
 }

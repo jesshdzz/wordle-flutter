@@ -22,7 +22,10 @@ class GameScreenState extends State<GameScreen> with SingleTickerProviderStateMi
   @override
   void initState() {
     super.initState();
-    _shakeController = AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
+    _shakeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showInstructions();
@@ -49,7 +52,11 @@ class GameScreenState extends State<GameScreen> with SingleTickerProviderStateMi
       appBar: AppBar(
         title: const Text("Wordle"),
         actions: [
-          IconButton(icon: const Icon(Icons.help_outline), onPressed: _showInstructions, tooltip: "Instrucciones"),
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            onPressed: _showInstructions,
+            tooltip: "Instrucciones",
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
@@ -61,56 +68,80 @@ class GameScreenState extends State<GameScreen> with SingleTickerProviderStateMi
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // ZONA DEL TABLERO
-          Expanded(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          bool isLandscape = constraints.maxWidth > constraints.maxHeight;
+
+          Widget board = Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(game.maxAttempts, (index) {
+              return buildRow(index);
+            }),
+          );
+
+          // Wrap board in FittedBox/Center to ensure it scales nicely
+          Widget centeredBoard = Expanded(
+            flex: 3,
             child: Center(
               child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(game.maxAttempts, (index) {
-                    return buildRow(index);
-                  }),
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: board,
                 ),
               ),
             ),
-          ),
+          );
 
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20.0),
-            child: GameKeyboard(
-              game: game, // Le pasamos el juego para que sepa los colores
-              onKeyPressed: (key) {
-                setState(() {
-                  game.onType(key);
-                });
-              },
-              onDelete: () {
-                setState(() {
-                  game.onDelete();
-                });
-              },
-              onEnter: () {
-                setState(() {
-                  if (game.palabraActual.length < game.wordLength) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("¡Faltan letras!"), duration: Duration(milliseconds: 500)),
-                    );
-                    _triggerShake();
-                    return;
-                  }
+          Widget keyboard = GameKeyboard(
+            game: game,
+            onKeyPressed: (key) {
+              setState(() {
+                game.onType(key);
+              });
+            },
+            onDelete: () {
+              setState(() {
+                game.onDelete();
+              });
+            },
+            onEnter: () {
+              setState(() {
+                if (game.palabraActual.length < game.wordLength) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("¡Faltan letras!"),
+                      duration: Duration(milliseconds: 500),
+                    ),
+                  );
+                  _triggerShake();
+                  return;
+                }
 
-                  if (game.onEnter()) {
-                    if (game.isGameOver) {
-                      showGameOverDialog();
-                    }
+                if (game.onEnter()) {
+                  if (game.isGameOver) {
+                    showGameOverDialog();
                   }
-                });
-              },
-            ),
-          ),
-        ],
+                }
+              });
+            },
+          );
+
+          // Wrap keyboard for sizing
+          Widget sizedKeyboard = isLandscape
+              ? Expanded(
+                  flex: 2,
+                  child: Center(child: SizedBox(width: 500, child: keyboard)),
+                )
+              : Padding(padding: const EdgeInsets.only(bottom: 20.0), child: keyboard);
+
+          if (isLandscape) {
+            return Row(
+              children: [centeredBoard, const VerticalDivider(width: 1), sizedKeyboard],
+            );
+          } else {
+            return Column(children: [centeredBoard, sizedKeyboard]);
+          }
+        },
       ),
     );
   }
@@ -155,7 +186,9 @@ class GameScreenState extends State<GameScreen> with SingleTickerProviderStateMi
         ? "¡Felicidades! Adivinaste la palabra."
         : "La palabra era: ${game.palabraClave}";
 
-    IconData icon = game.status == GameStatus.won ? Icons.emoji_events : Icons.sentiment_very_dissatisfied;
+    IconData icon = game.status == GameStatus.won
+        ? Icons.emoji_events
+        : Icons.sentiment_very_dissatisfied;
     Color color = game.status == GameStatus.won ? Colors.green : Colors.red;
 
     showDialog(
@@ -186,7 +219,10 @@ class GameScreenState extends State<GameScreen> with SingleTickerProviderStateMi
                 game.reset();
               });
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal,
+              foregroundColor: Colors.white,
+            ),
             child: const Text("Jugar de nuevo"),
           ),
         ],
