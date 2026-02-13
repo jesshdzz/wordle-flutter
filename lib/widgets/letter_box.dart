@@ -17,7 +17,13 @@ class _LetterBoxState extends State<LetterBox> with SingleTickerProviderStateMix
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    if (widget.status != LetterStatus.initial) {
+      _controller.value = 1.0;
+    }
   }
 
   @override
@@ -30,13 +36,16 @@ class _LetterBoxState extends State<LetterBox> with SingleTickerProviderStateMix
     }
 
     // Pop animation trigger (when typing a new letter)
-    if (widget.letter.isNotEmpty && widget.letter != oldWidget.letter && widget.status == LetterStatus.initial) {
+    if (widget.letter.isNotEmpty &&
+        widget.letter != oldWidget.letter &&
+        widget.status == LetterStatus.initial) {
       _controller.duration = const Duration(milliseconds: 150);
       _controller.forward(from: 0).then((_) => _controller.reverse());
     }
 
     // Reset controller if we go back to empty/initial (e.g. backspace)
-    if (widget.status == LetterStatus.initial && oldWidget.status != LetterStatus.initial) {
+    if (widget.status == LetterStatus.initial &&
+        oldWidget.status != LetterStatus.initial) {
       _controller.reset();
     }
   }
@@ -59,7 +68,10 @@ class _LetterBoxState extends State<LetterBox> with SingleTickerProviderStateMix
           if (_controller.isAnimating && _controller.duration!.inMilliseconds < 200) {
             scale = 1.0 + (_controller.value * 0.1);
           }
-          return Transform.scale(scale: scale, child: buildBox(widget.status, widget.letter));
+          return Transform.scale(
+            scale: scale,
+            child: buildBox(widget.status, widget.letter),
+          );
         }
 
         double angle = _controller.value * 3.14159; // PI
