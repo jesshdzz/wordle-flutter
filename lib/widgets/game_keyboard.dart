@@ -39,10 +39,11 @@ class GameKeyboard extends StatelessWidget {
 
         if (status == LetterStatus.correct) {
           bgColor = Colors.green;
-        } else if (status == LetterStatus.inWord)
+        } else if (status == LetterStatus.inWord) {
           bgColor = Colors.orangeAccent;
-        else if (status == LetterStatus.notInWord)
+        } else if (status == LetterStatus.notInWord) {
           bgColor = Colors.grey.shade600;
+        }
 
         return Container(
           margin: const EdgeInsets.all(3),

@@ -128,9 +128,7 @@ class GameScreenState extends State<GameScreen> with SingleTickerProviderStateMi
       animation: _shakeController,
       builder: (context, child) {
         double offset = 0;
-        // Only shake the current row
         if (rowIndex == game.palabrasIntentadas.length) {
-          // Simple sine wave shake: sin(value * PI * count)
           offset = 10 * sin(_shakeController.value * 3 * 3.14159);
         }
         return Transform.translate(offset: Offset(offset, 0), child: child);
