@@ -32,3 +32,24 @@ El proyecto se estructura en los siguientes componentes clave:
 3. Al presionar "ENTER", el sistema evalúa la palabra y actualiza los colores de las letras en el tablero y en el teclado.
 4. El usuario dispone de 6 intentos para adivinar la palabra correcta.
 5. El juego finaliza cuando el usuario acierta la palabra (Victoria) o agota sus intentos (Derrota), mostrando un cuadro de diálogo con el resultado y la opción de volver a jugar.
+
+## Imágenes
+
+### Pantalla de Juego
+
+![Pantalla de Juego](assets/new_game.jpeg)
+
+![Pantalla de Juego](assets/game.jpeg)
+
+### Pantalla de Juego Horizontal
+
+![Pantalla de Juego Horizontal](assets/horizontal.jpeg)
+
+### Pantalla de Instrucciones
+
+![Pantalla de Instrucciones](assets/instructions.jpeg)
+
+### Pantalla de Victoria
+
+![Pantalla de Victoria](assets/win.jpeg)
+

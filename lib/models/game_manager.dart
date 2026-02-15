@@ -19,7 +19,7 @@ class GameManager {
     "RELOJ",
     "LAPIZ",
     "PAPEL",
-    "FLOR",
+    "JUGAR",
     "NUBES",
     "COCHE",
     "AVION",
